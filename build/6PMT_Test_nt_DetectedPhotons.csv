@@ -1,0 +1,13 @@
+#class tools::wcsv::ntuple
+#title Escapes
+#separator 44
+#vector_separator 59
+#column double EDep_Trigger
+#column double N_Trigger
+#column double EDep_PEN
+#column double N_Left
+#column double N_Right
+#column double N_Bottom
+#column double N_Front
+#column double N_Back
+3,123.001,990.18,174,156,4066,89,212
