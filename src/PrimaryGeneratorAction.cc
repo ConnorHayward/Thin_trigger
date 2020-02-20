@@ -55,10 +55,10 @@ void PrimaryGeneratorAction::DefineParticle(){
 
     G4double ionCharge   = 0.*eplus;
     G4double excitEnergy = 0.*keV;
-		G4int Z=0, A=0;
+		G4int Z = 0, A = 0;
 		G4double x,y,z, sum;
 		G4ParticleDefinition* ion;
-		G4ThreeVector position = G4ThreeVector(0,20*mm,0*mm);
+		G4ThreeVector position = G4ThreeVector(0, 20*mm, 0*mm);
 		G4String name;
 		float rx,ry,rz;
 
@@ -117,10 +117,10 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	G4int Z=0, A=0;
 	G4double x,y,z, sum;
 	G4ParticleDefinition* ion;
-	G4ThreeVector position = G4ThreeVector(0,20*mm,0*mm);
+	G4ThreeVector position = G4ThreeVector(0, 20*mm, 0*mm);
 	G4String name;
 	float rx,ry,rz;
-	
+
 	switch (fSourceType) {
 		case 0:
 			Z = 55;

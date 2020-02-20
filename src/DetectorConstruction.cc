@@ -66,14 +66,14 @@ DetectorConstruction::DetectorConstruction()
 {
   fDetectorMessenger = new DetectorMessenger(this);
   fTargetMPT = new G4MaterialPropertiesTable();
-  fExpHall_x = fExpHall_y = fExpHall_z = 1*m;
+  fExpHallX = fExpHallY = fExpHallZ = 1*m;
   fTargetName = "holder";
   fThickness = 1*mm;
   fTargetThickness = 3*mm;
   fDetectorType = 0;
   fABSL = 1;
-  fRES=4.0;
-  fLY=10500./MeV;
+  fRES = 4.0;
+  fLY = 10500./MeV;
   fDetectorName = "6pmt_coverage_pe";
   fVolName = "World";
   fSigAlpha = 0.5;
@@ -180,7 +180,6 @@ void DetectorConstruction::SetWorldMaterial(G4String materialChoice)
   // search the material by its name
   G4Material* pttoMaterial =
      G4NistManager::Instance()->FindOrBuildMaterial(materialChoice);
-
   if (pttoMaterial) {
     fWorldMaterial = pttoMaterial;
     if ( fWLBox ) { fWLBox->SetMaterial(fWorldMaterial); }
@@ -238,29 +237,30 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
 
   G4double wavelength;
   char filler;
-  G4double varabsorlength;
+  G4double varAbsorLength;
   G4double ems;
-  G4double rindex;fABSL = 1;
+  G4double rindex;
+  fABSL = 1;
 
   G4double absEnergy[102]  = {0};
-  G4double abs[102]={0};
-  G4double emission[102]={0};
-  G4double rIndex[102]={0};
-  G4double rIndex_fAir[102]={0};
-  G4double ems_abs[102]={0};
+  G4double abs[102] = {0};
+  G4double emission[102] = {0};
+  G4double rIndex[102] = {0};
+  G4double rIndex_fAir[102] = {0};
+  G4double emsAbs[102] = {0};
 
   G4int absEntries = 0;
   ifstream ReadAbs;
 
-  G4String abs_file = "../input_files/Exp4_long.csv";
+  G4String absFile = "../input_files/Exp4_long.csv";
   G4double emission_fibre[102]={0};
-  ReadAbs.open(abs_file);
+  ReadAbs.open(absFile);
   G4double var = GetABS();
   if(ReadAbs.is_open())
   {
     while(!ReadAbs.eof())
     {
-      ReadAbs>>wavelength>>filler>>varabsorlength>>filler>>ems>>filler>>rindex;
+      ReadAbs>>wavelength>>filler>>varAbsorLength>>filler>>ems>>filler>>rindex;
       if(ReadAbs.eof()){
         break;
       }
@@ -268,14 +268,14 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
       abs[absEntries] = 50*mm;
       emission[absEntries] = ems;
       rIndex[absEntries] = 1.65;
-      rIndex_fAir[absEntries]=1.0;
-      ems_abs[absEntries]=0.02;
-      emission_fibre[absEntries]=1.0;
+      rIndex_fAir[absEntries] = 1.0;
+      emsAbs[absEntries] = 0.02;
+      emission_fibre[absEntries] = 1.0;
       absEntries++;
     }
   }
 
-  else G4cout<<"Error opening file: " <<abs_file<<G4endl;
+  else G4cout<<"Error opening file: " <<absFile<<G4endl;
   ReadAbs.close();
   absEntries--;
 
@@ -364,7 +364,7 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   scintEntries--;
 
   G4int absorbEntries = 0;
-  G4double varabsorblength;
+  G4double varAbsorbLength;
   G4double absorbEnergy[501] = {0};
   G4double Absorb[501] = {0};
 
@@ -376,9 +376,9 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   {
       while(!ReadAbsorb.eof())
       {
-          ReadAbsorb>>wavelength>>filler>>varabsorblength;
+          ReadAbsorb>>wavelength>>filler>>varAbsorbLength;
           absorbEnergy[500 - absorbEntries]=(1240/wavelength)*eV;
-          Absorb[500 - absorbEntries]=varabsorblength*m;
+          Absorb[500 - absorbEntries]=varAbsorbLength*m;
           absorbEntries++;
       }
   }else G4cout<<"Error opening file: "<<ReadAbsorb<<G4endl;
@@ -419,9 +419,9 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   {
       while(!ReadWLSAbsorb.eof())
       {
-          ReadWLSAbsorb>>wavelength>>filler>>varabsorblength;
+          ReadWLSAbsorb>>wavelength>>filler>>varAbsorbLength;
           wlsAbsorbEnergy[500 - wlsAbsorbEntries]=(1240/wavelength)*eV;
-          wlsAbsorb[500 - wlsAbsorbEntries]=varabsorblength*m;
+          wlsAbsorb[500 - wlsAbsorbEntries]=varAbsorbLength*m;
           wlsAbsorbEntries++;
       }
   }else G4cout<<"Error opening file: "<<ReadWLSAbsorb<<G4endl;
@@ -485,32 +485,32 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Material* air = man->FindOrBuildMaterial("G4_AIR");
 
 // The experimental Hall
-  fWorldBox = new G4Box("World",fExpHall_x,fExpHall_y,fExpHall_z);
+  fWorldBox = new G4Box("World",fExpHallX,fExpHallY,fExpHallZ);
 
   fWLBox = new G4LogicalVolume(fWorldBox,fAir,"World",0,0,0);
 
   fWPBox = new G4PVPlacement(0,G4ThreeVector(),fWLBox,"World",0,false,0);
 
-  double target_width = 1.5*cm;
+  double targetWidth = 1.5*cm;
   fTargetThickness = 1.5*mm;
   double reflector_thickness = 25*um;
-  fBox = new G4Box("target", target_width, fTargetThickness, target_width);
+  fBox = new G4Box("target", targetWidth, fTargetThickness, targetWidth);
   fLBox = new G4LogicalVolume(fBox,fPEN, "target",0,0,0);
-  G4Box* pen_foil_box = new G4Box("foil", target_width, reflector_thickness, target_width);
-  G4LogicalVolume* pen_foil_log = new G4LogicalVolume(pen_foil_box, teflon, "foil", 0, 0, 0);
+  G4Box* penFoilBox = new G4Box("foil", targetWidth, reflector_thickness, targetWidth);
+  G4LogicalVolume* penFoilLog = new G4LogicalVolume(penFoilBox, teflon, "foil", 0, 0, 0);
   double position = 0;
 
-  double trigger_width = 50*um;
-  double trigger_side = 15*mm;
-  G4Box* trigger_box = new G4Box("trigger", trigger_side, trigger_width, trigger_side);
-  G4LogicalVolume* trigger_log = new G4LogicalVolume(trigger_box, fScintilator, "trigger", 0, 0, 0);
-  G4LogicalVolume* trigger_shield = new G4LogicalVolume(trigger_box, air, "trigger", 0, 0, 0);
+  double triggerWidth = 50*um;
+  double triggerSide = 15*mm;
+  G4Box* triggerBox = new G4Box("trigger", triggerSide, triggerWidth, triggerSide);
+  G4LogicalVolume* triggerLog = new G4LogicalVolume(triggerBox, fScintilator, "trigger", 0, 0, 0);
+  G4LogicalVolume* triggerShield = new G4LogicalVolume(triggerBox, air, "trigger", 0, 0, 0);
 
-  double foil_width = 75*um;
-  double foil_side = 16*mm;
-  G4VSolid* foil_box = new G4Box("foil", foil_side, foil_width, foil_side);
-  G4SubtractionSolid* foil_layer = new G4SubtractionSolid("foil_layer", foil_box, trigger_box, 0, G4ThreeVector(-1*mm, 0, 0));
-  G4LogicalVolume* foil_log = new G4LogicalVolume(foil_layer, teflon, "foil", 0, 0, 0);
+  double foilWidth = 75*um;
+  double foilSide = 16*mm;
+  G4VSolid* foilBox = new G4Box("foil", foilSide, foilWidth, foilSide);
+  G4SubtractionSolid* foilLayer = new G4SubtractionSolid("foilLayer", foilBox, triggerBox, 0, G4ThreeVector(-1*mm, 0, 0));
+  G4LogicalVolume* foilLog = new G4LogicalVolume(foilLayer, teflon, "foil", 0, 0, 0);
 
   G4ThreeVector point = G4ThreeVector(0,0,5*cm);
   G4Navigator* pointNavigator = new G4Navigator();
@@ -521,12 +521,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   char filler;
   G4double wavelength;
-  G4double cath_eff;
-  G4double photocath_energy[57];
-  G4double photocath_EFF[57];
-  G4double perfect_EFF[57];
-  G4double perfect_REFL[57];
-  G4double photocath_REFL[57]={0};
+  G4double cathEff;
+  G4double photocathEnergy[57];
+  G4double photocathEff[57];
+  G4double perfectEff[57];
+  G4double perfectRefl[57];
+  G4double photocathRefl[57]={0};
   G4String pmt_file = "../input_files/pmtQE.csv";
 
   ifstream ReadEff;
@@ -537,14 +537,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   {
     while(!ReadEff.eof())
     {
-      ReadEff>>wavelength>>filler>>cath_eff;
+      ReadEff>>wavelength>>filler>>cathEff;
       if(ReadEff.eof()){
         break;
       }
-      photocath_energy[57-effCounter] = (1240/wavelength)*eV;
-      photocath_EFF[57-effCounter] = cath_eff;
-      perfect_EFF[57-effCounter] = 1;
-      perfect_REFL[57-effCounter] = 0;
+      photocathEnergy[57-effCounter] = (1240/wavelength)*eV;
+      photocathEff[57-effCounter] = cathEff;
+      perfectEff[57-effCounter] = 1;
+      perfectRefl[57-effCounter] = 0;
       effCounter++;
     }
   }
@@ -553,63 +553,59 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   ReadEff.close();
   effCounter--;
 
-  const G4int nPMT_EFF = sizeof(photocath_energy)/sizeof(G4double);
+  const G4int nPMT_EFF = sizeof(photocathEnergy)/sizeof(G4double);
 
-  G4OpticalSurface* perfect_optsurf = new G4OpticalSurface("perfect",glisur,polished, dielectric_metal);
+  G4OpticalSurface* perfectOptSurf = new G4OpticalSurface("perfect",glisur,polished, dielectric_metal);
   G4MaterialPropertiesTable* detector_MT = new G4MaterialPropertiesTable();
-  detector_MT->AddProperty("EFFICIENCY", photocath_energy, perfect_EFF,nPMT_EFF);
-  detector_MT->AddProperty("REFLECTIVITY", photocath_energy, perfect_REFL,nPMT_EFF);
-  perfect_optsurf->SetMaterialPropertiesTable(detector_MT);
-  G4OpticalSurface* pmt_optsurf = new G4OpticalSurface("pmt", glisur, polished, dielectric_metal);
+  detector_MT->AddProperty("EFFICIENCY", photocathEnergy, perfectEff,nPMT_EFF);
+  detector_MT->AddProperty("REFLECTIVITY", photocathEnergy, perfectRefl,nPMT_EFF);
+  perfectOptSurf->SetMaterialPropertiesTable(detector_MT);
+  G4OpticalSurface* pmtOptSurf = new G4OpticalSurface("pmt", glisur, polished, dielectric_metal);
   G4MaterialPropertiesTable* pmt_MT = new G4MaterialPropertiesTable();
-  pmt_MT->AddProperty("EFFICIENCY", photocath_energy, photocath_EFF,nPMT_EFF);
-  pmt_MT->AddProperty("REFLECTIVITY", photocath_energy, perfect_REFL,nPMT_EFF);
-  pmt_optsurf->SetMaterialPropertiesTable(pmt_MT);
+  pmt_MT->AddProperty("EFFICIENCY", photocathEnergy, photocathEff,nPMT_EFF);
+  pmt_MT->AddProperty("REFLECTIVITY", photocathEnergy, perfectRefl,nPMT_EFF);
+  pmtOptSurf->SetMaterialPropertiesTable(pmt_MT);
 
 
   G4LogicalVolume* tileDetectorLog = new G4LogicalVolume(fBox,fSi, "tile_sensor");
-  new G4LogicalSkinSurface("pen_det_surf",tileDetectorLog,perfect_optsurf);
+  new G4LogicalSkinSurface("pen_det_surf",tileDetectorLog,perfectOptSurf);
 
   LightGuideConstruction guide;
   G4VSolid* guide_box = guide.ConstructPlate();
-  //G4LogicalVolume* plate_log = guide.ConstructGuideLog();
-  //G4cout <<  G4BestUnit(plate_log->GetMass(true),"Mass") << G4endl;
+  //G4LogicalVolume* plateLog = guide.ConstructGuideLog();
+  //G4cout <<  G4BestUnit(plateLog->GetMass(true),"Mass") << G4endl;
 
   G4OpticalSurface* AirPEN = new G4OpticalSurface("AirPEN",glisur, ground, dielectric_dielectric);
   AirPEN -> SetPolish(fSigAlpha);
   AirPEN -> SetMaterialPropertiesTable(fTargetMPT);
 
-  G4VPhysicalVolume* siPM_placement;
-  G4VPhysicalVolume* siPM_case_placement;
-  G4VPhysicalVolume* siPM_board_placement;
-
   G4VPhysicalVolume* vacPlacement;
 
-  G4double casing_length = 30*mm/2;
-  G4double casing_height = 32.5*mm/2;
-  G4double casing_hole = 29*mm / 2;
-  G4double casing_hole_height = 31.5*mm/2;
+  G4double casingLength = 30*mm/2;
+  G4double casingHeight = 32.5*mm/2;
+  G4double casingHole = 29*mm / 2;
+  G4double casingHoleHeight = 31.5*mm/2;
 
-  G4double photo_cath_length = 26*mm/2;
-  G4double photo_cath_eff_length = 23*mm/2;
-  G4double photo_cath_height = 0.8*mm;
+  G4double photoCathLength = 26*mm/2;
+  G4double photoCathEffLength = 23*mm/2;
+  G4double photoCathEffHeight = 0.8*mm;
 
-  G4Box* pmt_case = new G4Box("case",casing_length,casing_length,casing_height);
-  G4Box* pHole = new G4Box("hole",casing_hole,casing_hole,casing_hole_height);
-  G4SubtractionSolid* pmt_shell = new G4SubtractionSolid("pmt_shell",pmt_case,pHole);
+  G4Box* pmtCase = new G4Box("case",casingLength,casingLength,casingHeight);
+  G4Box* pHole = new G4Box("hole",casingHole,casingHole,casingHoleHeight);
+  G4SubtractionSolid* pmtShell = new G4SubtractionSolid("pmtShell",pmtCase,pHole);
 
-  G4LogicalVolume* pmt_void = new G4LogicalVolume(pHole, fVacuum,"vacuum");
-  G4LogicalVolume* pmt_case_log = new G4LogicalVolume(pmt_shell,fPOM,"pmt_case_log");
+  G4LogicalVolume* pmtVoid = new G4LogicalVolume(pHole, fVacuum,"vacuum");
+  G4LogicalVolume* pmtCaseLog = new G4LogicalVolume(pmtShell,fPOM,"pmtCaseLog");
 
-  G4Box* pmt_cath = new G4Box("pmt_cathode",photo_cath_length,photo_cath_height, photo_cath_length);
-  G4Box* pmt_active = new G4Box("pmt_active",photo_cath_eff_length,photo_cath_height,photo_cath_eff_length);
-  G4SubtractionSolid* pmt_inactive_cath = new G4SubtractionSolid("pmt_inactive_cathode",pmt_cath,pmt_active);
-  G4LogicalVolume* pmt_inactive_cath_log = new G4LogicalVolume(pmt_inactive_cath,fGlass,"pmt_inactive_cath_log");
-  G4LogicalVolume* pmt_cath_log = new G4LogicalVolume(pmt_active,fGlass,"pmt_cath_log");
+  G4Box* pmtCath = new G4Box("pmt_cathode",photoCathLength,photoCathEffHeight, photoCathLength);
+  G4Box* pmtActive = new G4Box("pmt_active",photoCathEffLength,photoCathEffHeight,photoCathEffLength);
+  G4SubtractionSolid* pmtInactiveCath = new G4SubtractionSolid("pmtInactiveCathode",pmtCath,pmtActive);
+  G4LogicalVolume* pmtInactiveCathLog = new G4LogicalVolume(pmtInactiveCath,fGlass,"pmtInactiveCathLog");
+  G4LogicalVolume* pmtCathLog = new G4LogicalVolume(pmtActive,fGlass,"pmtCathLog");
 
-  new G4LogicalSkinSurface("pmt_surf", pmt_cath_log,pmt_optsurf);
+  new G4LogicalSkinSurface("pmt_surf", pmtCathLog,pmtOptSurf);
 
-//  new G4LogicalSkinSurface("spec_surf",pmt_cath_log,perfect_optsurf);
+//  new G4LogicalSkinSurface("spec_surf",pmtCathLog,perfectOptSurf);
 
   G4RotationMatrix* rotationMatrix = new G4RotationMatrix(0,0,0);
   rotationMatrix->rotateZ(90*deg);
@@ -639,14 +635,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VPhysicalVolume* mainCathPlacement4;
   G4VPhysicalVolume* mainCathPlacement5;
 
-  G4VPhysicalVolume* pen_foil_placement;
+  G4VPhysicalVolume* pen_foilPlacement;
 
   // Set Draw G4VisAttributes
 
   G4VisAttributes* visAttr = new G4VisAttributes();
   visAttr->SetVisibility(false);
   fWLBox->SetVisAttributes(visAttr);
-  pmt_void->SetVisAttributes(visAttr);
+  pmtVoid->SetVisAttributes(visAttr);
 
   G4VisAttributes* tileAttr = new G4VisAttributes(G4Colour::Blue());
   tileAttr->SetVisibility(true);
@@ -654,20 +650,20 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4VisAttributes* opticalAttributes = new G4VisAttributes(G4Colour::Red());
   opticalAttributes->SetVisibility(true);
-  foil_log->SetVisAttributes(opticalAttributes);
-  pen_foil_log->SetVisAttributes(opticalAttributes);
+  foilLog->SetVisAttributes(opticalAttributes);
+  penFoilLog->SetVisAttributes(opticalAttributes);
 
 
   // Active Detectors
   G4VisAttributes* detectorAttr = new G4VisAttributes(G4Colour::Green());
   detectorAttr->SetVisibility(true);
   detectorAttr->SetForceSolid(false);
-  pmt_cath_log->SetVisAttributes(detectorAttr);
+  pmtCathLog->SetVisAttributes(detectorAttr);
 
   // Inactive volumes
   G4VisAttributes* innactiveAttr = new G4VisAttributes(G4Colour::Gray());
-  pmt_inactive_cath_log->SetVisAttributes(innactiveAttr);
-  pmt_case_log->SetVisAttributes(innactiveAttr);
+  pmtInactiveCathLog->SetVisAttributes(innactiveAttr);
+  pmtCaseLog->SetVisAttributes(innactiveAttr);
 
   man = G4NistManager::Instance();
 
@@ -693,20 +689,20 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   pmmaMPT->AddProperty("ABSLENGTH", energy, abs, nEntries1)->SetSpline(true);
   pmmaMPT->AddProperty("REFLECTIVITY", energy, refl, nEntries1)->SetSpline(true);
   PMMA->SetMaterialPropertiesTable(pmmaMPT);
-  G4LogicalVolume* plate_log = new G4LogicalVolume(guide_box, PMMA, "Ligh_guide_log");
+  G4LogicalVolume* plateLog = new G4LogicalVolume(guide_box, PMMA, "Ligh_guideLog");
 
 
-  G4double pmt_diameter = 23.5*mm;
-  G4double pmt_depth = 1*mm;
+  G4double pmtDiamater = 23.5*mm;
+  G4double pmtDepth = 1*mm;
 
   G4MaterialPropertiesTable* ejMPT = new G4MaterialPropertiesTable();
   G4double ej_refractive_index[] = {1.46, 1.46, 1.46, 1.46, 1.46, 1.46};
   ejMPT->AddProperty("ABSLENGTH", energy, abs, nEntries1);
   ejMPT->AddProperty("RINDEX", energy, ej_refractive_index, nEntries1)->SetSpline(true);
   ej_550->SetMaterialPropertiesTable(ejMPT);
-  G4Tubs* grease_cyl = new G4Tubs("dip", 0, pmt_diameter/2, pmt_depth/2, 0, 360*deg);
-  G4LogicalVolume* grease_log = new G4LogicalVolume(grease_cyl, ej_550, "grease_log");
-  grease_log->SetVisAttributes(opticalAttributes);
+  G4Tubs* grease_cyl = new G4Tubs("dip", 0, pmtDiamater/2, pmtDepth/2, 0, 360*deg);
+  G4LogicalVolume* greaseLog = new G4LogicalVolume(grease_cyl, ej_550, "greaseLog");
+  greaseLog->SetVisAttributes(opticalAttributes);
   /*
   0 - PMT on base of tile, collimator included.
   */
@@ -715,27 +711,27 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Place main tile at centre of world volume
 
   fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,0),fLBox,"target",fWLBox,false,0,false);
-  pen_foil_placement = new G4PVPlacement(0, G4ThreeVector(0,reflector_thickness+fTargetThickness,0),pen_foil_log,"target",fWLBox,false,0,false);
+  pen_foilPlacement = new G4PVPlacement(0, G4ThreeVector(0,reflector_thickness+fTargetThickness,0),penFoilLog,"target",fWLBox,false,0,false);
 
   // Trigger and light guide placment, with trigger PMT
 
-  G4VPhysicalVolume* trigger_placement = new G4PVPlacement(0, G4ThreeVector(0,18*mm,0), trigger_log, "trigger", fWLBox, false, 0, false);
-//  G4VPhysicalVolume* shield_placement = new G4PVPlacement(0, G4ThreeVector(0,16*mm,0), trigger_shield, "trigger", fWLBox, false, 0, false);
-//  G4VPhysicalVolume* shield_placement1 = new G4PVPlacement(0, G4ThreeVector(0,19*mm,0), trigger_shield, "trigger", fWLBox, false, 0, false);
-  G4VPhysicalVolume* foil_placement = new G4PVPlacement(0, G4ThreeVector(2*mm,0,0), foil_log, "foil", trigger_log, false, 0, false);
-  G4VPhysicalVolume* guide_placement = new G4PVPlacement(rotationMatrix4, G4ThreeVector(-(trigger_side+20*mm-0.4*mm), (18*mm+14*mm-1.75*mm), 0),plate_log,"target",fWLBox,false,0,false);
-  G4VPhysicalVolume* grease_placement =  new G4PVPlacement(rotationMatrix5, G4ThreeVector(-19*mm-(trigger_side+20*mm),(18*mm+14*mm-1.75*mm),0), grease_log, "grease", fWLBox, false, 0, false);
-  cathPlacement = new G4PVPlacement(rotationMatrix,G4ThreeVector(-(20*mm+photo_cath_height),0,0),pmt_cath_log,"trigger_pmt",plate_log,false,0,false);
-  incathPlacement= new G4PVPlacement(0,G4ThreeVector(0,0,0),pmt_inactive_cath_log,"inactive_detector1",pmt_cath_log,false,0,true);
-  pmtPlacement = new G4PVPlacement(0,G4ThreeVector(0,-(casing_length+photo_cath_height),0),pmt_case_log,"pmt1", pmt_cath_log,false,0,true);
-  pmtVoidPlacement = new G4PVPlacement(0,G4ThreeVector(), pmt_void, "void1", pmt_case_log, false, 0, true);
+  G4VPhysicalVolume* triggerPlacement = new G4PVPlacement(0, G4ThreeVector(0,18*mm,0), triggerLog, "trigger", fWLBox, false, 0, false);
+//  G4VPhysicalVolume* shieldPlacement = new G4PVPlacement(0, G4ThreeVector(0,16*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
+//  G4VPhysicalVolume* shieldPlacement1 = new G4PVPlacement(0, G4ThreeVector(0,19*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
+  G4VPhysicalVolume* foilPlacement = new G4PVPlacement(0, G4ThreeVector(2*mm,0,0), foilLog, "foil", triggerLog, false, 0, false);
+  G4VPhysicalVolume* guidePlacement = new G4PVPlacement(rotationMatrix4, G4ThreeVector(-(triggerSide+20*mm-0.4*mm), (18*mm+14*mm-1.75*mm), 0),plateLog,"target",fWLBox,false,0,false);
+  G4VPhysicalVolume* greasePlacement =  new G4PVPlacement(rotationMatrix5, G4ThreeVector(-19*mm-(triggerSide+20*mm),(18*mm+14*mm-1.75*mm),0), greaseLog, "grease", fWLBox, false, 0, false);
+  cathPlacement = new G4PVPlacement(rotationMatrix,G4ThreeVector(-(20*mm+photoCathEffHeight),0,0),pmtCathLog,"trigger_pmt",plateLog,false,0,false);
+  incathPlacement= new G4PVPlacement(0,G4ThreeVector(0,0,0),pmtInactiveCathLog,"inactive_detector1",pmtCathLog,false,0,true);
+  pmtPlacement = new G4PVPlacement(0,G4ThreeVector(0,-(casingLength+photoCathEffHeight),0),pmtCaseLog,"pmt1", pmtCathLog,false,0,true);
+  pmtVoidPlacement = new G4PVPlacement(0,G4ThreeVector(), pmtVoid, "void1", pmtCaseLog, false, 0, true);
 
   // Main PMT placements
-  mainCathPlacement1 = new G4PVPlacement(rotationMatrix, G4ThreeVector(-(target_width+photo_cath_height), 0, 0), pmt_cath_log, "main_pmt_1", fWLBox, false, 0, false);
-  mainCathPlacement2 = new G4PVPlacement(rotationMatrix1, G4ThreeVector((target_width+photo_cath_height), 0, 0), pmt_cath_log, "main_pmt_2", fWLBox, false, 0, false);
-  mainCathPlacement3 = new G4PVPlacement(0, G4ThreeVector(0,-(fTargetThickness+photo_cath_height),0), pmt_cath_log, "main_pmt_3", fWLBox, false, 0, false);
-  mainCathPlacement4 = new G4PVPlacement(rotationMatrix2, G4ThreeVector(0,0,(target_width+photo_cath_height)),pmt_cath_log, "main_pmt_4", fWLBox, false, 0, false);
-  mainCathPlacement5 = new G4PVPlacement(rotationMatrix3, G4ThreeVector(0,0,-(target_width+photo_cath_height)),pmt_cath_log, "main_pmt_5", fWLBox, false, 0, false);
+  mainCathPlacement1 = new G4PVPlacement(rotationMatrix, G4ThreeVector(-(targetWidth+photoCathEffHeight), 0, 0), pmtCathLog, "main_pmt_1", fWLBox, false, 0, false);
+  mainCathPlacement2 = new G4PVPlacement(rotationMatrix1, G4ThreeVector((targetWidth+photoCathEffHeight), 0, 0), pmtCathLog, "main_pmt_2", fWLBox, false, 0, false);
+  mainCathPlacement3 = new G4PVPlacement(0, G4ThreeVector(0,-(fTargetThickness+photoCathEffHeight),0), pmtCathLog, "main_pmt_3", fWLBox, false, 0, false);
+  mainCathPlacement4 = new G4PVPlacement(rotationMatrix2, G4ThreeVector(0,0,(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_4", fWLBox, false, 0, false);
+  mainCathPlacement5 = new G4PVPlacement(rotationMatrix3, G4ThreeVector(0,0,-(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_5", fWLBox, false, 0, false);
 
   G4OpticalSurface* AirTrigger = new G4OpticalSurface("AirTrigger", glisur, polished, dielectric_dielectric);
   AirTrigger->SetPolish(0.99);
@@ -745,13 +741,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4OpticalSurface* PMMATrigger = new G4OpticalSurface("PMMATrigger", glisur, ground, dielectric_dielectric);
   PMMATrigger->SetPolish(0.1);
 
-  G4LogicalBorderSurface* surfaceTriggerAir = new G4LogicalBorderSurface("AirTrigger", trigger_placement, foil_placement, AirTrigger);
-  G4LogicalBorderSurface* surfaceAirTrigger = new G4LogicalBorderSurface("AirTrigger", fWPBox, foil_placement, AirTrigger);
-  G4LogicalBorderSurface* surfacePENFoil = new G4LogicalBorderSurface("AirTrigger", fPBox, pen_foil_placement, AirTrigger);
-  G4LogicalBorderSurface* surfaceAirPMMA = new G4LogicalBorderSurface("AirPMMA", guide_placement, fWPBox, AirPMMA);
-//  G4LogicalBorderSurface* surfacePMMAAir = new G4LogicalBorderSurface("AirPMMA", fWPBox, guide_placement, AirPMMA);
-  G4LogicalBorderSurface* surfacePMMATrigger = new G4LogicalBorderSurface("TriggerPMMA", trigger_placement, guide_placement, PMMATrigger);
-  G4LogicalBorderSurface* surfaceTriggerPMMA = new G4LogicalBorderSurface("TriggerPMMA", guide_placement, trigger_placement, PMMATrigger);
+  G4LogicalBorderSurface* surfaceTriggerAir = new G4LogicalBorderSurface("AirTrigger", triggerPlacement, foilPlacement, AirTrigger);
+  G4LogicalBorderSurface* surfaceAirTrigger = new G4LogicalBorderSurface("AirTrigger", fWPBox, foilPlacement, AirTrigger);
+  G4LogicalBorderSurface* surfacePENFoil = new G4LogicalBorderSurface("AirTrigger", fPBox, pen_foilPlacement, AirTrigger);
+  G4LogicalBorderSurface* surfaceAirPMMA = new G4LogicalBorderSurface("AirPMMA", guidePlacement, fWPBox, AirPMMA);
+//  G4LogicalBorderSurface* surfacePMMAAir = new G4LogicalBorderSurface("AirPMMA", fWPBox, guidePlacement, AirPMMA);
+  G4LogicalBorderSurface* surfacePMMATrigger = new G4LogicalBorderSurface("TriggerPMMA", triggerPlacement, guidePlacement, PMMATrigger);
+  G4LogicalBorderSurface* surfaceTriggerPMMA = new G4LogicalBorderSurface("TriggerPMMA", guidePlacement, triggerPlacement, PMMATrigger);
 //  G4LogicalBorderSurface* surfaceAirPEN = new G4LogicalBorderSurface("AirPEN",fWPBox,fPBox,AirPEN);
 //  G4LogicalBorderSurface* surfacePENAir = new G4LogicalBorderSurface("AirPEN",fPBox,fWPBox,AirPEN);
 

@@ -96,9 +96,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void               DefineMaterials();
 
   private:
-    G4double fExpHall_x;
-    G4double fExpHall_y;
-    G4double fExpHall_z;
+    G4double fExpHallX;
+    G4double fExpHallY;
+    G4double fExpHallZ;
 
     G4double fLY;
     G4double fRES;
