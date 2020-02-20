@@ -15,11 +15,12 @@ h_edep_foil_pen = fit(Histogram, foil_data.EDep_PEN, 0:10:1200)
 pen_plt = plot(h_edep_foil_pen, st=:step, label = "Foil", legend = :topleft, xlabel = "Energy in PEN [keV]")
 
 foil_data.N_total = foil_data.N_Left .+ foil_data.N_Right .+ foil_data.N_Bottom .+ foil_data.N_Front .+ foil_data.N_Back
-h_nphotons = fit(Histogram, foil_data.N_total, 0:50:5500)
-peak_bin = findmax(h_nphotons.weights[10:end])[2]+9
+h_nphotons = fit(Histogram, foil_data.N_total, 0:10:2000)
+peak_bin = findmax(h_nphotons.weights[30:end])[2]+29
+println(peak_bin)
 photon_plt = plot(h_nphotons, st=:step, label = "PEN", legend = :topright, xlabel = "Number of Photons", ylabel = "Events / 10 photons")
 
-vline!(photon_plt, [midpoints(0:50:5500)[peak_bin]], label = "$(midpoints(0:50:5500)[peak_bin])")
+vline!(photon_plt, [midpoints(0:10:2000)[peak_bin]], label = "$(midpoints(0:10:2000)[peak_bin])")
 combi_energy = plot(xlabel = "Energy [keV]", ylabel = "Events / 10 keV")
 plot!(combi_energy, h_edep_foil_pen, st=:step, label = "PEN")
 plot!(combi_energy, h_edep_foil, st=:step, label = "Trigger")
