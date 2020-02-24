@@ -136,6 +136,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4Material* fGlass;
     G4Material* fPOM;
     G4Material* fABS;
+    G4Material* fPMMA;
+    G4Material* ej_550;
 
     G4int fDetectorType;
     G4String fDetectorName;

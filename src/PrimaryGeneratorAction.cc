@@ -32,7 +32,7 @@ fDetector(det)
 	fSourceEnergy = 1500*keV;
 	fPhotonWavelength = 0;
 	fParticleName = "void";
-	fPoint = G4ThreeVector();
+	// fPoint = G4ThreeVector();
 	DefineParticle();
 }
 
@@ -62,46 +62,47 @@ void PrimaryGeneratorAction::DefineParticle(){
 		G4String name;
 		float rx,ry,rz;
 
-		switch (fSourceType) {
-			case 0:
-				Z = 55;
-				A = 137;
-				ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
-				fParticleGun->SetParticleEnergy(0*eV);
-				fParticleGun->SetParticlePosition(position);
-				fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
-				fParticleGun->SetParticleDefinition(ion);
-				fParticleGun->SetParticleCharge(ionCharge);
-				break;
-			case 1:
-				Z = 83;
-				A = 207;
-				ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
-				fParticleGun->SetParticleEnergy(0*eV);
-				fParticleGun->SetParticlePosition(position);
-				fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
-				fParticleGun->SetParticleDefinition(ion);
-				fParticleGun->SetParticleCharge(ionCharge);
-				break;
-			case 2:
-				Z = 38;
-				A = 90;
-				ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
-				fParticleGun->SetParticleEnergy(0*eV);
-				fParticleGun->SetParticlePosition(position);
-				fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
-				fParticleGun->SetParticleDefinition(ion);
-				fParticleGun->SetParticleCharge(ionCharge);
-				break;
-			case 3:
+		// switch (fSourceType) {
+		// 	case 0:
+		// 		Z = 55;
+		// 		A = 137;
+		// 		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
+		// 		fParticleGun->SetParticleEnergy(0*eV);
+		// 		fParticleGun->SetParticlePosition(position);
+		// 		fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
+		// 		fParticleGun->SetParticleDefinition(ion);
+		// 		fParticleGun->SetParticleCharge(ionCharge);
+		// 		break;
+		// 	case 1:
+		// 		Z = 83;
+		// 		A = 207;
+		// 		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
+		// 		fParticleGun->SetParticleEnergy(0*eV);
+		// 		fParticleGun->SetParticlePosition(position);
+		// 		fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
+		// 		fParticleGun->SetParticleDefinition(ion);
+		// 		fParticleGun->SetParticleCharge(ionCharge);
+		// 		break;
+		// 	case 2:
+		// 		Z = 38;
+		// 		A = 90;
+		// 		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
+		// 		fParticleGun->SetParticleEnergy(0*eV);
+		// 		fParticleGun->SetParticlePosition(position);
+		// 		fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
+		// 		fParticleGun->SetParticleDefinition(ion);
+		// 		fParticleGun->SetParticleCharge(ionCharge);
+		// 		break;
+		// 	case 3:
 				fParticleGun->SetParticleDefinition(particleTable->FindParticle("e-"));
 				fParticleGun->SetParticleEnergy(1.0639*MeV);
 				fParticleGun->SetParticlePosition(position);
-				//fParticleGun->SetParticleMomentumDirection(G4ThreeVector(2*(rand()-1),2*(rand()-1),2*(rand()-1)));
+			  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(2*(rand()-1),2*(rand()-1),2*(rand()-1)));
 				fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0,-1,0));
-				break;
-
-		}
+		//		G4cout << "Finish Def" << G4endl;
+		// 		break;
+		//
+		// }
 	//SetParticleName(Z,A,excitEnergy);
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -120,7 +121,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	G4ThreeVector position = G4ThreeVector(0, 20*mm, 0*mm);
 	G4String name;
 	float rx,ry,rz;
-
+	
 	switch (fSourceType) {
 		case 0:
 			Z = 55;

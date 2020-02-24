@@ -13,6 +13,8 @@
 #include "EventAction.hh"
 
 #include <string>
+#include <ctime>
+#include <sys/stat.h>
 
 #include "DetectorConstruction.hh"
 #include "PrimaryGeneratorAction.hh"
@@ -32,6 +34,19 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* kin)
 RunAction::~RunAction()
 {
   delete fTimer;
+}
+
+std::string datetime()
+{
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer,80,"%d-%m-%Y %H-%M-%S",timeinfo);
+    return std::string(buffer);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -62,8 +77,8 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4cout << sourceString << G4endl;
 
-  G4int directory = fDetector->GetDetectorType();
-  G4String directorName;
+  G4String directorName = "../output/"+sourceString+"-" + datetime()+"/";
+  mkdir(directorName, 0777);
 
   G4String position = G4BestUnit((fDetector->GetTargetSize()-fPrimary->GetSourcePosition()),"Length");
 
@@ -75,7 +90,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   G4String alpha_string = std::to_string(fDetector->GetSigAlpha());
   replace(alpha_string.begin(),alpha_string.end(),'.',',');
 
-  fFileName = "6PMT_Trigger_Foil+Grease_3500";
+  fFileName = directorName+"6PMT_Trigger_Foil+Grease_3500_demo.csv";
 
   fMan->SetVerboseLevel(0);
   fMan->OpenFile(fFileName);

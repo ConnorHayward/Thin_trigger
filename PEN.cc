@@ -1,8 +1,8 @@
 #include "G4RunManager.hh"
 
-// #ifdef G4MULTITHREADED
-// #include "G4MTRunManager.hh"
-// #endif
+ #ifdef G4MULTITHREADED
+ #include "G4MTRunManager.hh"
+ #endif
 
 #include "G4UImanager.hh"
 
@@ -19,6 +19,7 @@
 #include "G4UIExecutive.hh"
 #endif
 
+#include "unistd.h"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 namespace {
   void PrintUsage() {
@@ -69,12 +70,12 @@ int main(int argc,char** argv)
 
   // Construct the default run manager
   //
-// #ifdef G4MULTITHREADED
-//   G4MTRunManager * runManager = new G4MTRunManager;
-//   if ( nThreads > 0 ) runManager->SetNumberOfThreads(nThreads);
-//#else
+#ifdef G4MULTITHREADED
+   G4MTRunManager * runManager = new G4MTRunManager;
+   if ( nThreads > 0 ) runManager->SetNumberOfThreads(nThreads);
+#else
   G4RunManager * runManager = new G4RunManager;
-//#endif
+#endif
 
   // Seed the random number generator manually
   G4Random::setTheSeed(myseed);
@@ -87,21 +88,23 @@ int main(int argc,char** argv)
   // Detector construction
   DetectorConstruction* det = new DetectorConstruction;
   runManager->SetUserInitialization(det);
+
+  //
   // Physics list
   runManager-> SetUserInitialization(new PhysicsList());
 
-  runManager->Initialize();
   // User action initialization
   runManager->SetUserInitialization(new ActionInitialization(det));
-
+  //G4cout<<"All init"<<G4endl;
+  runManager->Initialize();
 
 
 #ifdef G4VIS_USE
   // Initialize visualization
   //
-  G4VisManager* visManager = new G4VisExecutive;
+//  G4VisManager* visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // G4VisManager* visManager = new G4VisExecutive("Quiet");
+  G4VisManager* visManager = new G4VisExecutive("Quiet");
   visManager->Initialize();
 #endif
 

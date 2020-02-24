@@ -37,7 +37,6 @@ void EventAction::BeginOfEventAction(const G4Event* myEvent)
 	fBottomPhoton=0;
 	fLeftPhoton=0;
 	fRightPhoton=0;
-
 	if (myEvent->GetEventID() % 1000 == 0)
 		G4cout << "event no.: " << myEvent->GetEventID() << G4endl;
 }

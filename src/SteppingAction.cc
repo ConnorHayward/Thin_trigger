@@ -20,6 +20,7 @@
 SteppingAction::SteppingAction(EventAction* eventAction)
 : fOneStepPrimaries(false), fEventAction(eventAction)
 {
+
 	fExpectedNextStatus = Undefined;
 }
 
@@ -33,7 +34,7 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
 {
 	auto analysisManager = G4AnalysisManager::Instance();
 	G4Track* theTrack = theStep->GetTrack();
-
+	//G4cout << "Begin Stepping" << G4endl;
 	fExpectedNextStatus = Undefined;
 
 	G4StepPoint* thePrePoint = theStep->GetPreStepPoint();

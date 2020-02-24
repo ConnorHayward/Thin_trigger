@@ -83,7 +83,7 @@ void PhysicsList::ConstructParticle()
 
 void PhysicsList::ConstructProcess()
 {
-  //SetVerbose(0);
+
   AddTransportation();
   ConstructDecay();
   ConstructEM();

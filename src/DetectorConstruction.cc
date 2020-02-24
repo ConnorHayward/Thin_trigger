@@ -193,7 +193,8 @@ void DetectorConstruction::SetWorldMaterial(G4String materialChoice)
 /*
 Defines materials used in simulation. Sets material properties for PEN and other optical components.
 */
-void DetectorConstruction::DefineMaterials(){// ------------- Materials -------------
+void DetectorConstruction::DefineMaterials(){
+  // ============================================================= Materials =============================================================
   G4double a, z, density;
   G4int nelements;
 
@@ -447,6 +448,36 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   MPT->AddConstProperty("YIELDRATIO",1.0);
 
   fScintilator->SetMaterialPropertiesTable(MPT);
+
+  // G4double density, a;
+  // G4int nelements, z;
+  // G4Element* O = new G4Element("Oxygen"  , "O", z=8 , a=16.00*g/mole);
+  // G4Element* C = new G4Element("Carbon", "C", z=12, a=12*g/mole);
+  // G4Element* H = new G4Element("Hydrogen", "H", z=1, a=1.01*g/mole);
+
+  fPMMA = new G4Material("PMMA", density = 1.18*g/cm3, nelements = 3);
+  fPMMA->AddElement(C, 5);
+  fPMMA->AddElement(O, 2);
+  fPMMA->AddElement(H, 8);
+
+  G4double refractive_index[] = {1.49, 1.49, 1.49, 1.49, 1.49, 1.49};
+  G4double absPMMA[] = {1*m, 1*m, 1*m, 1*m, 1*m, 1*m};
+  G4double reflPMMA[] = {0.9, 0.9, 0.9, 0.9, 0.9, 0.9};
+  G4double energyPMMA[] = {2.18*eV, 2.48*eV, 2.58*eV, 2.68*eV, 2.78*eV, 4.1*eV};
+  const G4int nEntries3 = sizeof(energyPMMA)/sizeof(G4double);
+
+  G4MaterialPropertiesTable* pmmaMPT = new G4MaterialPropertiesTable();
+  pmmaMPT->AddProperty("RINDEX", energyPMMA, refractive_index, nEntries3);
+  pmmaMPT->AddProperty("ABSLENGTH", energyPMMA, absPMMA, nEntries3)->SetSpline(true);
+  pmmaMPT->AddProperty("REFLECTIVITY", energyPMMA, reflPMMA, nEntries3)->SetSpline(true);
+  fPMMA->SetMaterialPropertiesTable(pmmaMPT);
+
+  ej_550 = man->FindOrBuildMaterial("G4_WATER");
+  G4MaterialPropertiesTable* ejMPT = new G4MaterialPropertiesTable();
+  G4double ej_refractive_index[] = {1.46, 1.46, 1.46, 1.46, 1.46, 1.46};
+  ejMPT->AddProperty("ABSLENGTH", energyPMMA, absPMMA, nEntries3);
+  ejMPT->AddProperty("RINDEX", energyPMMA, ej_refractive_index, nEntries3)->SetSpline(true);
+  ej_550->SetMaterialPropertiesTable(ejMPT);
 }
 
 void DetectorConstruction::SetVolName(G4ThreeVector thePoint){
@@ -472,23 +503,21 @@ Defines detector sensitivities and properties.
 */
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-    G4GDMLParser parser;
-    G4GeometryManager::GetInstance()->OpenGeometry();
-    G4LogicalVolumeStore::GetInstance()->Clean();
-    G4PhysicalVolumeStore::GetInstance()->Clean();
-    G4SolidStore::GetInstance()->Clean();
-    G4NistManager* man = G4NistManager::Instance();
-// ------------- Volumes --------------
-  G4Material* teflon = man->FindOrBuildMaterial("G4_TEFLON");
+  G4GDMLParser parser;
+  G4GeometryManager::GetInstance()->OpenGeometry();
+  G4LogicalVolumeStore::GetInstance()->Clean();
+  G4PhysicalVolumeStore::GetInstance()->Clean();
+  G4SolidStore::GetInstance()->Clean();
+  G4NistManager* man = G4NistManager::Instance();
 
-  G4Material* ej_550 = man->FindOrBuildMaterial("G4_WATER");
+  G4Material* teflon = man->FindOrBuildMaterial("G4_TEFLON");
   G4Material* air = man->FindOrBuildMaterial("G4_AIR");
+
+// ============================================================= Define Volumes =============================================================
 
 // The experimental Hall
   fWorldBox = new G4Box("World",fExpHallX,fExpHallY,fExpHallZ);
-
   fWLBox = new G4LogicalVolume(fWorldBox,fAir,"World",0,0,0);
-
   fWPBox = new G4PVPlacement(0,G4ThreeVector(),fWLBox,"World",0,false,0);
 
   double targetWidth = 1.5*cm;
@@ -517,7 +546,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   pointNavigator->SetWorldVolume(fWPBox);
   pointNavigator->LocateGlobalPointAndSetup(point);
 
-  // --------------Detectors--------------
+  // ============================================================= Detectors =============================================================
 
   char filler;
   G4double wavelength;
@@ -560,12 +589,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   detector_MT->AddProperty("EFFICIENCY", photocathEnergy, perfectEff,nPMT_EFF);
   detector_MT->AddProperty("REFLECTIVITY", photocathEnergy, perfectRefl,nPMT_EFF);
   perfectOptSurf->SetMaterialPropertiesTable(detector_MT);
+
   G4OpticalSurface* pmtOptSurf = new G4OpticalSurface("pmt", glisur, polished, dielectric_metal);
   G4MaterialPropertiesTable* pmt_MT = new G4MaterialPropertiesTable();
   pmt_MT->AddProperty("EFFICIENCY", photocathEnergy, photocathEff,nPMT_EFF);
   pmt_MT->AddProperty("REFLECTIVITY", photocathEnergy, perfectRefl,nPMT_EFF);
   pmtOptSurf->SetMaterialPropertiesTable(pmt_MT);
-
 
   G4LogicalVolume* tileDetectorLog = new G4LogicalVolume(fBox,fSi, "tile_sensor");
   new G4LogicalSkinSurface("pen_det_surf",tileDetectorLog,perfectOptSurf);
@@ -579,15 +608,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   AirPEN -> SetPolish(fSigAlpha);
   AirPEN -> SetMaterialPropertiesTable(fTargetMPT);
 
-  G4VPhysicalVolume* vacPlacement;
-
-  G4double casingLength = 30*mm/2;
-  G4double casingHeight = 32.5*mm/2;
+  G4double casingLength = 30*mm / 2;
+  G4double casingHeight = 32.5*mm / 2;
   G4double casingHole = 29*mm / 2;
-  G4double casingHoleHeight = 31.5*mm/2;
+  G4double casingHoleHeight = 31.5*mm / 2;
 
-  G4double photoCathLength = 26*mm/2;
-  G4double photoCathEffLength = 23*mm/2;
+  G4double photoCathLength = 26*mm / 2;
+  G4double photoCathEffLength = 23*mm / 2;
   G4double photoCathEffHeight = 0.8*mm;
 
   G4Box* pmtCase = new G4Box("case",casingLength,casingLength,casingHeight);
@@ -602,9 +629,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4SubtractionSolid* pmtInactiveCath = new G4SubtractionSolid("pmtInactiveCathode",pmtCath,pmtActive);
   G4LogicalVolume* pmtInactiveCathLog = new G4LogicalVolume(pmtInactiveCath,fGlass,"pmtInactiveCathLog");
   G4LogicalVolume* pmtCathLog = new G4LogicalVolume(pmtActive,fGlass,"pmtCathLog");
-
   new G4LogicalSkinSurface("pmt_surf", pmtCathLog,pmtOptSurf);
-
 //  new G4LogicalSkinSurface("spec_surf",pmtCathLog,perfectOptSurf);
 
   G4RotationMatrix* rotationMatrix = new G4RotationMatrix(0,0,0);
@@ -617,13 +642,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4RotationMatrix* rotationMatrix3 = new G4RotationMatrix(0,0,0);
   rotationMatrix3->rotateX(90*deg);
   rotationMatrix3->rotateZ(180*deg);
-
   G4RotationMatrix* rotationMatrix4 = new G4RotationMatrix(0,0,0);
   rotationMatrix4->rotateX(180*deg);
-
   G4RotationMatrix* rotationMatrix5 = new G4RotationMatrix(0,0,0);
   rotationMatrix5->rotateZ(90*deg);
   rotationMatrix5->rotateX(90*deg);
+
   G4VPhysicalVolume* pmtPlacement;
   G4VPhysicalVolume* incathPlacement;
   G4VPhysicalVolume* cathPlacement;
@@ -636,6 +660,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VPhysicalVolume* mainCathPlacement5;
 
   G4VPhysicalVolume* pen_foilPlacement;
+  G4VPhysicalVolume* vacPlacement;
 
   // Set Draw G4VisAttributes
 
@@ -653,7 +678,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   foilLog->SetVisAttributes(opticalAttributes);
   penFoilLog->SetVisAttributes(opticalAttributes);
 
-
   // Active Detectors
   G4VisAttributes* detectorAttr = new G4VisAttributes(G4Colour::Green());
   detectorAttr->SetVisibility(true);
@@ -667,45 +691,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   man = G4NistManager::Instance();
 
-  G4double density, a;
-  G4int nelements, z;
-  G4Element* O = new G4Element("Oxygen"  , "O", z=8 , a=16.00*g/mole);
-  G4Element* C = new G4Element("Carbon", "C", z=12, a=12*g/mole);
-  G4Element* H = new G4Element("Hydrogen", "H", z=1, a=1.01*g/mole);
-
-  G4Material* PMMA = new G4Material("PMMA", density = 1.18*g/cm3, nelements = 3);
-  PMMA->AddElement(C, 5);
-  PMMA->AddElement(O, 2);
-  PMMA->AddElement(H, 8);
-
-  G4double refractive_index[] = {1.49, 1.49, 1.49, 1.49, 1.49, 1.49};
-  G4double abs[] = {1*m, 1*m, 1*m, 1*m, 1*m, 1*m};
-  G4double refl[] = {0.9, 0.9, 0.9, 0.9, 0.9, 0.9};
-  G4double energy[] = {2.18*eV, 2.48*eV, 2.58*eV, 2.68*eV, 2.78*eV, 4.1*eV};
-  const G4int nEntries1 = sizeof(energy)/sizeof(G4double);
-
-  G4MaterialPropertiesTable* pmmaMPT = new G4MaterialPropertiesTable();
-  pmmaMPT->AddProperty("RINDEX", energy, refractive_index, nEntries1);
-  pmmaMPT->AddProperty("ABSLENGTH", energy, abs, nEntries1)->SetSpline(true);
-  pmmaMPT->AddProperty("REFLECTIVITY", energy, refl, nEntries1)->SetSpline(true);
-  PMMA->SetMaterialPropertiesTable(pmmaMPT);
-  G4LogicalVolume* plateLog = new G4LogicalVolume(guide_box, PMMA, "Ligh_guideLog");
-
+  G4LogicalVolume* plateLog = new G4LogicalVolume(guide_box, fPMMA, "Ligh_guideLog");
 
   G4double pmtDiamater = 23.5*mm;
   G4double pmtDepth = 1*mm;
-
-  G4MaterialPropertiesTable* ejMPT = new G4MaterialPropertiesTable();
-  G4double ej_refractive_index[] = {1.46, 1.46, 1.46, 1.46, 1.46, 1.46};
-  ejMPT->AddProperty("ABSLENGTH", energy, abs, nEntries1);
-  ejMPT->AddProperty("RINDEX", energy, ej_refractive_index, nEntries1)->SetSpline(true);
-  ej_550->SetMaterialPropertiesTable(ejMPT);
   G4Tubs* grease_cyl = new G4Tubs("dip", 0, pmtDiamater/2, pmtDepth/2, 0, 360*deg);
+
   G4LogicalVolume* greaseLog = new G4LogicalVolume(grease_cyl, ej_550, "greaseLog");
   greaseLog->SetVisAttributes(opticalAttributes);
-  /*
-  0 - PMT on base of tile, collimator included.
-  */
+
+  //  ============================================================= Place volumes =============================================================
   fDetectorType = 0;
 
   // Place main tile at centre of world volume
@@ -722,9 +717,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VPhysicalVolume* guidePlacement = new G4PVPlacement(rotationMatrix4, G4ThreeVector(-(triggerSide+20*mm-0.4*mm), (18*mm+14*mm-1.75*mm), 0),plateLog,"target",fWLBox,false,0,false);
   G4VPhysicalVolume* greasePlacement =  new G4PVPlacement(rotationMatrix5, G4ThreeVector(-19*mm-(triggerSide+20*mm),(18*mm+14*mm-1.75*mm),0), greaseLog, "grease", fWLBox, false, 0, false);
   cathPlacement = new G4PVPlacement(rotationMatrix,G4ThreeVector(-(20*mm+photoCathEffHeight),0,0),pmtCathLog,"trigger_pmt",plateLog,false,0,false);
-  incathPlacement= new G4PVPlacement(0,G4ThreeVector(0,0,0),pmtInactiveCathLog,"inactive_detector1",pmtCathLog,false,0,true);
-  pmtPlacement = new G4PVPlacement(0,G4ThreeVector(0,-(casingLength+photoCathEffHeight),0),pmtCaseLog,"pmt1", pmtCathLog,false,0,true);
-  pmtVoidPlacement = new G4PVPlacement(0,G4ThreeVector(), pmtVoid, "void1", pmtCaseLog, false, 0, true);
+  incathPlacement= new G4PVPlacement(0,G4ThreeVector(0,0,0),pmtInactiveCathLog,"inactive_detector1",pmtCathLog,false,0,false);
+  pmtPlacement = new G4PVPlacement(0,G4ThreeVector(0,-(casingLength+photoCathEffHeight),0),pmtCaseLog,"pmt1", pmtCathLog,false,0,false);
+  pmtVoidPlacement = new G4PVPlacement(0,G4ThreeVector(), pmtVoid, "void1", pmtCaseLog, false, 0, false);
 
   // Main PMT placements
   mainCathPlacement1 = new G4PVPlacement(rotationMatrix, G4ThreeVector(-(targetWidth+photoCathEffHeight), 0, 0), pmtCathLog, "main_pmt_1", fWLBox, false, 0, false);
@@ -732,6 +727,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   mainCathPlacement3 = new G4PVPlacement(0, G4ThreeVector(0,-(fTargetThickness+photoCathEffHeight),0), pmtCathLog, "main_pmt_3", fWLBox, false, 0, false);
   mainCathPlacement4 = new G4PVPlacement(rotationMatrix2, G4ThreeVector(0,0,(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_4", fWLBox, false, 0, false);
   mainCathPlacement5 = new G4PVPlacement(rotationMatrix3, G4ThreeVector(0,0,-(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_5", fWLBox, false, 0, false);
+
+ //  ============================================================= Surfaces =============================================================
 
   G4OpticalSurface* AirTrigger = new G4OpticalSurface("AirTrigger", glisur, polished, dielectric_dielectric);
   AirTrigger->SetPolish(0.99);
