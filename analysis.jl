@@ -4,7 +4,13 @@ using CSV, DataFrames, StatsBase, Glob, Plots, LsqFit
 
 Plots.pyplot()
 
-function run_analysis(folder)
+"""
+    run_analysis(folder::String)
+    Read and plot simulation data from folder.
+    Saves plot of energy deposit and detected light output from PEN.
+"""
+
+function run_analysis(folder::String)
     files = glob("output/$folder/*_t*.csv")
     df = DataFrame(N_Trigger = Int64[], EDep_Trigger = Float32[], EDep_PEN = Float32[], N_Left = Int64[], N_Right = Int64[], N_Bottom = Int64[], N_Front = Int64[], N_Back = Int64[])
     for file in values(files)
