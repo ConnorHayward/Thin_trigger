@@ -19,14 +19,14 @@ function run_analysis(folder::String)
     end
     df.N_total = df.N_Left .+ df.N_Right .+ df.N_Bottom .+ df.N_Front .+ df.N_Back
 
-    h_nphotons = fit(Histogram, df.N_total, 0:10:2000)
+    h_nphotons = fit(Histogram, df.N_total, 0:10:4000)
     peak_bin = findmax(h_nphotons.weights[30:end])[2]+29
     photon_plt = plot(h_nphotons, st=:step, label = "PEN", legend = :topright, xlabel = "Number of Photons", ylabel = "Events / 10 photons")
 
     h_edep_pen = fit(Histogram, df.EDep_PEN, 0:10:1200)
     pen_plt = plot(h_edep_pen, st=:step, label = "Foil", legend = :topleft, xlabel = "Energy in PEN [keV]")
 
-    vline!(photon_plt, [midpoints(0:10:2000)[peak_bin]], label = "$(midpoints(0:10:2000)[peak_bin])")
+    vline!(photon_plt, [midpoints(0:10:4000)[peak_bin]], label = "$(midpoints(0:10:4000)[peak_bin])")
     combi_energy = plot(xlabel = "Energy [keV]", ylabel = "Events / 10 keV")
     plot!(combi_energy, h_edep_pen, st=:step, label = "PEN")
     combined_plt = plot(layout = (2,1), size = (800,800), combi_energy, photon_plt)
