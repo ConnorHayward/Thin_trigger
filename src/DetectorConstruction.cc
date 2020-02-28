@@ -521,10 +521,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   fWPBox = new G4PVPlacement(0,G4ThreeVector(),fWLBox,"World",0,false,0);
 
   double targetWidth = 1.5*cm;
-  fTargetThickness = 1.5*mm;
+  fTargetThickness = 0.725*mm;
   double reflector_thickness = 25*um;
   fBox = new G4Box("target", targetWidth, fTargetThickness, targetWidth);
   fLBox = new G4LogicalVolume(fBox,fPEN, "target",0,0,0);
+  G4LogicalVolume* tileLog = new G4LogicalVolume(fBox,fPEN, "target",0,0,0);
   G4Box* penFoilBox = new G4Box("foil", targetWidth, reflector_thickness, targetWidth);
   G4LogicalVolume* penFoilLog = new G4LogicalVolume(penFoilBox, teflon, "foil", 0, 0, 0);
   double position = 0;
@@ -662,6 +663,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VPhysicalVolume* pen_foilPlacement;
   G4VPhysicalVolume* vacPlacement;
 
+  G4VPhysicalVolume* tilePlacement;
+
+  G4VPhysicalVolume* triggerPlacement;
+//  G4VPhysicalVolume* shieldPlacement
+//  G4VPhysicalVolume* shieldPlacement1
+  G4VPhysicalVolume* foilPlacement;
+  G4VPhysicalVolume* guidePlacement;
+  G4VPhysicalVolume* greasePlacement;
+
   // Set Draw G4VisAttributes
 
   G4VisAttributes* visAttr = new G4VisAttributes();
@@ -701,21 +711,53 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   greaseLog->SetVisAttributes(opticalAttributes);
 
   //  ============================================================= Place volumes =============================================================
-  fDetectorType = 0;
+  fDetectorType = 1;
 
   // Place main tile at centre of world volume
+  switch(fDetectorType){
 
+  case 0:
+    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,0),fLBox,"target",fWLBox,false,0,false);
+    pen_foilPlacement = new G4PVPlacement(0, G4ThreeVector(0,reflector_thickness+fTargetThickness,0),penFoilLog,"target",fWLBox,false,0,false);
+
+    // Trigger and light guide placment, with trigger PMT
+
+     triggerPlacement = new G4PVPlacement(0, G4ThreeVector(0,18*mm,0), triggerLog, "trigger", fWLBox, false, 0, false);
+  //   shieldPlacement = new G4PVPlacement(0, G4ThreeVector(0,16*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
+  //   shieldPlacement1 = new G4PVPlacement(0, G4ThreeVector(0,19*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
+     foilPlacement = new G4PVPlacement(0, G4ThreeVector(2*mm,0,0), foilLog, "foil", triggerLog, false, 0, false);
+     guidePlacement = new G4PVPlacement(rotationMatrix4, G4ThreeVector(-(triggerSide+20*mm-0.4*mm), (18*mm+14*mm-1.75*mm), 0),plateLog,"target",fWLBox,false,0,false);
+     greasePlacement =  new G4PVPlacement(rotationMatrix5, G4ThreeVector(-19*mm-(triggerSide+20*mm),(18*mm+14*mm-1.75*mm),0), greaseLog, "grease", fWLBox, false, 0, false);
+    cathPlacement = new G4PVPlacement(rotationMatrix,G4ThreeVector(-(20*mm+photoCathEffHeight),0,0),pmtCathLog,"trigger_pmt",plateLog,false,0,false);
+    incathPlacement= new G4PVPlacement(0,G4ThreeVector(0,0,0),pmtInactiveCathLog,"inactive_detector1",pmtCathLog,false,0,false);
+    pmtPlacement = new G4PVPlacement(0,G4ThreeVector(0,-(casingLength+photoCathEffHeight),0),pmtCaseLog,"pmt1", pmtCathLog,false,0,false);
+    pmtVoidPlacement = new G4PVPlacement(0,G4ThreeVector(), pmtVoid, "void1", pmtCaseLog, false, 0, false);
+
+    // Main PMT placements
+    mainCathPlacement1 = new G4PVPlacement(rotationMatrix, G4ThreeVector(-(targetWidth+photoCathEffHeight), 0, 0), pmtCathLog, "main_pmt_1", fWLBox, false, 0, false);
+    mainCathPlacement2 = new G4PVPlacement(rotationMatrix1, G4ThreeVector((targetWidth+photoCathEffHeight), 0, 0), pmtCathLog, "main_pmt_2", fWLBox, false, 0, false);
+    mainCathPlacement3 = new G4PVPlacement(0, G4ThreeVector(0,-(fTargetThickness+photoCathEffHeight),0), pmtCathLog, "main_pmt_3", fWLBox, false, 0, false);
+    mainCathPlacement4 = new G4PVPlacement(rotationMatrix2, G4ThreeVector(0,0,(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_4", fWLBox, false, 0, false);
+    mainCathPlacement5 = new G4PVPlacement(rotationMatrix3, G4ThreeVector(0,0,-(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_5", fWLBox, false, 0, false);
+    break;
+
+  case 1:
   fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,0),fLBox,"target",fWLBox,false,0,false);
-  pen_foilPlacement = new G4PVPlacement(0, G4ThreeVector(0,reflector_thickness+fTargetThickness,0),penFoilLog,"target",fWLBox,false,0,false);
+  for(int i = 0; i<5;i++){
+    tilePlacement = new G4PVPlacement(0, G4ThreeVector(0,i*2*fTargetThickness,0),fLBox,"target",fWLBox,false,i,false);
+  }
+
+
+  pen_foilPlacement = new G4PVPlacement(0, G4ThreeVector(0,reflector_thickness+fTargetThickness*10,0),penFoilLog,"target",fWLBox,false,0,false);
 
   // Trigger and light guide placment, with trigger PMT
 
-  G4VPhysicalVolume* triggerPlacement = new G4PVPlacement(0, G4ThreeVector(0,18*mm,0), triggerLog, "trigger", fWLBox, false, 0, false);
-//  G4VPhysicalVolume* shieldPlacement = new G4PVPlacement(0, G4ThreeVector(0,16*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
-//  G4VPhysicalVolume* shieldPlacement1 = new G4PVPlacement(0, G4ThreeVector(0,19*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
-  G4VPhysicalVolume* foilPlacement = new G4PVPlacement(0, G4ThreeVector(2*mm,0,0), foilLog, "foil", triggerLog, false, 0, false);
-  G4VPhysicalVolume* guidePlacement = new G4PVPlacement(rotationMatrix4, G4ThreeVector(-(triggerSide+20*mm-0.4*mm), (18*mm+14*mm-1.75*mm), 0),plateLog,"target",fWLBox,false,0,false);
-  G4VPhysicalVolume* greasePlacement =  new G4PVPlacement(rotationMatrix5, G4ThreeVector(-19*mm-(triggerSide+20*mm),(18*mm+14*mm-1.75*mm),0), greaseLog, "grease", fWLBox, false, 0, false);
+   triggerPlacement = new G4PVPlacement(0, G4ThreeVector(0,18*mm,0), triggerLog, "trigger", fWLBox, false, 0, false);
+//   shieldPlacement = new G4PVPlacement(0, G4ThreeVector(0,16*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
+//   shieldPlacement1 = new G4PVPlacement(0, G4ThreeVector(0,19*mm,0), triggerShield, "trigger", fWLBox, false, 0, false);
+   foilPlacement = new G4PVPlacement(0, G4ThreeVector(2*mm,0,0), foilLog, "foil", triggerLog, false, 0, false);
+   guidePlacement = new G4PVPlacement(rotationMatrix4, G4ThreeVector(-(triggerSide+20*mm-0.4*mm), (18*mm+14*mm-1.75*mm), 0),plateLog,"target",fWLBox,false,0,false);
+   greasePlacement =  new G4PVPlacement(rotationMatrix5, G4ThreeVector(-19*mm-(triggerSide+20*mm),(18*mm+14*mm-1.75*mm),0), greaseLog, "grease", fWLBox, false, 0, false);
   cathPlacement = new G4PVPlacement(rotationMatrix,G4ThreeVector(-(20*mm+photoCathEffHeight),0,0),pmtCathLog,"trigger_pmt",plateLog,false,0,false);
   incathPlacement= new G4PVPlacement(0,G4ThreeVector(0,0,0),pmtInactiveCathLog,"inactive_detector1",pmtCathLog,false,0,false);
   pmtPlacement = new G4PVPlacement(0,G4ThreeVector(0,-(casingLength+photoCathEffHeight),0),pmtCaseLog,"pmt1", pmtCathLog,false,0,false);
@@ -727,6 +769,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   mainCathPlacement3 = new G4PVPlacement(0, G4ThreeVector(0,-(fTargetThickness+photoCathEffHeight),0), pmtCathLog, "main_pmt_3", fWLBox, false, 0, false);
   mainCathPlacement4 = new G4PVPlacement(rotationMatrix2, G4ThreeVector(0,0,(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_4", fWLBox, false, 0, false);
   mainCathPlacement5 = new G4PVPlacement(rotationMatrix3, G4ThreeVector(0,0,-(targetWidth+photoCathEffHeight)),pmtCathLog, "main_pmt_5", fWLBox, false, 0, false);
+  break;
+  }
 
  //  ============================================================= Surfaces =============================================================
 
@@ -741,6 +785,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4LogicalBorderSurface* surfaceTriggerAir = new G4LogicalBorderSurface("AirTrigger", triggerPlacement, foilPlacement, AirTrigger);
   G4LogicalBorderSurface* surfaceAirTrigger = new G4LogicalBorderSurface("AirTrigger", fWPBox, foilPlacement, AirTrigger);
   G4LogicalBorderSurface* surfacePENFoil = new G4LogicalBorderSurface("AirTrigger", fPBox, pen_foilPlacement, AirTrigger);
+  G4LogicalBorderSurface* surfacePENFoil1 = new G4LogicalBorderSurface("AirTrigger", tilePlacement, pen_foilPlacement, AirTrigger);
   G4LogicalBorderSurface* surfaceAirPMMA = new G4LogicalBorderSurface("AirPMMA", guidePlacement, fWPBox, AirPMMA);
 //  G4LogicalBorderSurface* surfacePMMAAir = new G4LogicalBorderSurface("AirPMMA", fWPBox, guidePlacement, AirPMMA);
   G4LogicalBorderSurface* surfacePMMATrigger = new G4LogicalBorderSurface("TriggerPMMA", triggerPlacement, guidePlacement, PMMATrigger);

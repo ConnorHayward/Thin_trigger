@@ -26,6 +26,7 @@ fDetector(det)
 	fPrimaryMessenger = new PrimaryGeneratorMessenger(this);
 	fParticleGun = new G4ParticleGun(n_particle);
 	fPosition = 2*cm;
+	fSourceType = 1;
  	//default kinematic
 	G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
 	G4ParticleDefinition* particle = particleTable->FindParticle("e-");
@@ -121,7 +122,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	G4ThreeVector position = G4ThreeVector(0, 20*mm, 0*mm);
 	G4String name;
 	float rx,ry,rz;
-	
+
 	switch (fSourceType) {
 		case 0:
 			Z = 55;

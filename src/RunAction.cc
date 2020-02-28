@@ -90,7 +90,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   G4String alpha_string = std::to_string(fDetector->GetSigAlpha());
   replace(alpha_string.begin(),alpha_string.end(),'.',',');
 
-  fFileName = directorName+"6PMT_Trigger_Foil+Grease_3500_demo.csv";
+  fFileName = directorName+"6PMT_Trigger_Foil+Grease_3500_stack.csv";
 
   fMan->SetVerboseLevel(0);
   fMan->OpenFile(fFileName);
