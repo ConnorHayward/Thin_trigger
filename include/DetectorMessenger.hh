@@ -38,6 +38,7 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADouble* fABSCMD;
     G4UIcmdWithADouble* fAlphaCMD;
     G4UIcmdWithAString* fDetNameCMD;
+    G4UIcmdWithAString* fAbsFileCMD;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

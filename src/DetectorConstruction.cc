@@ -36,7 +36,7 @@
 #include "G4UnionSolid.hh"
 #include "G4VoxelLimits.hh"
 
-#include "G4RunManager.hh"
+#include "G4MTRunManager.hh"
 #include "G4PhysicalConstants.hh"
 
 #include "G4GeometryManager.hh"
@@ -75,6 +75,7 @@ DetectorConstruction::DetectorConstruction()
   fRES = 4.0;
   fLY = 10500./MeV;
   fDetectorName = "6pmt_coverage_pe";
+  fABSFile = "Exp4_long.csv";
   fVolName = "World";
   fSigAlpha = 0.5;
   DefineMaterials();
@@ -97,19 +98,19 @@ void DetectorConstruction::SetSize(G4double value){
   }
   UpdateGeometry();
 
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetLY(G4double value){
   fLY=value;
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetRes(G4double value){
   fRES=value;
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -119,14 +120,14 @@ void DetectorConstruction::SetDetectorType(G4int value){
   fDetectorType=value;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetABS(G4double value){
   fABSL=value;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
   DefineMaterials();
 }
 
@@ -134,7 +135,7 @@ void DetectorConstruction::SetSigAlpha(G4double value){
   fSigAlpha=value;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
   DefineMaterials();
 }
 
@@ -142,7 +143,13 @@ void DetectorConstruction::SetDetectorName(G4String name){
   fDetectorName=name;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
+}
+
+void DetectorConstruction::SetABSFile(G4String fileName){
+  fABSFile = fileName;
+  UpdateGeometry();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -162,13 +169,13 @@ void DetectorConstruction::SetTargetMaterial(G4String materialChoice)
     G4cout << "\n--> warning from DetectorConstruction::SetMaterial : "
            << materialChoice << " not found" << G4endl;
   }
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetRI(G4double value){
   fRI = value;
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
   DefineMaterials();
 }
 
@@ -187,7 +194,7 @@ void DetectorConstruction::SetWorldMaterial(G4String materialChoice)
     G4cout << "\n--> warning from DetectorConstruction::SetMaterial : "
            << materialChoice << " not found" << G4endl;
   }
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -253,7 +260,7 @@ void DetectorConstruction::DefineMaterials(){
   G4int absEntries = 0;
   ifstream ReadAbs;
 
-  G4String absFile = "../input_files/Exp4_long.csv";
+  G4String absFile = "../input_files/"+fABSFile;
   G4double emission_fibre[102]={0};
   ReadAbs.open(absFile);
   G4double var = GetABS();
@@ -491,7 +498,7 @@ void DetectorConstruction::SetPropertyTable(G4Material* material, G4MaterialProp
 }
 
 void DetectorConstruction::UpdateGeometry(){
-  G4RunManager::GetRunManager()->DefineWorldVolume(Construct());
+  G4MTRunManager::GetRunManager()->DefineWorldVolume(Construct());
 }
 
 /*
@@ -503,11 +510,11 @@ Defines detector sensitivities and properties.
 */
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-  G4GDMLParser parser;
-  G4GeometryManager::GetInstance()->OpenGeometry();
-  G4LogicalVolumeStore::GetInstance()->Clean();
-  G4PhysicalVolumeStore::GetInstance()->Clean();
-  G4SolidStore::GetInstance()->Clean();
+    // G4GDMLParser parser;
+    // G4GeometryManager::GetInstance()->OpenGeometry();
+    // G4LogicalVolumeStore::GetInstance()->Clean();
+    // G4PhysicalVolumeStore::GetInstance()->Clean();
+    // G4SolidStore::GetInstance()->Clean();
   G4NistManager* man = G4NistManager::Instance();
 
   G4Material* teflon = man->FindOrBuildMaterial("G4_TEFLON");

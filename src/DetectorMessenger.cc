@@ -16,7 +16,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
  fWMaterCMD(0),
  fSizeCMD(0),
  fTypeCMD(0),
- fLYCMD(0),fResCMD(0),fDetNameCMD(0),fABSCMD(0)
+ fLYCMD(0),fResCMD(0),fDetNameCMD(0),fABSCMD(0), fAbsFileCMD(0)
 {
   fDetDir = new G4UIdirectory("/PEN/det/");
   fDetDir->SetGuidance("detector construction commands");
@@ -73,6 +73,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   fDetNameCMD->AvailableForStates(G4State_PreInit,G4State_Idle);
   fDetNameCMD->SetToBeBroadcasted(false);
 
+  fAbsFileCMD = new G4UIcmdWithAString("/PEN/det/setAbsFile",this);
+  fAbsFileCMD->SetGuidance("Set abs file name.");
+  fAbsFileCMD->SetParameterName("choice",false);
+  fAbsFileCMD->AvailableForStates(G4State_PreInit,G4State_Idle);
+  fAbsFileCMD->SetToBeBroadcasted(false);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -89,6 +95,7 @@ DetectorMessenger::~DetectorMessenger()
   delete fResCMD;
   delete fABSCMD;
   delete fDetNameCMD;
+  delete fAbsFileCMD;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -122,4 +129,6 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if(command==fAlphaCMD)
   {fDetector->SetSigAlpha(fAlphaCMD->GetNewDoubleValue(newValue));}
 
+  if(command==fAbsFileCMD)
+  {fDetector->SetABSFile(newValue);}
 }

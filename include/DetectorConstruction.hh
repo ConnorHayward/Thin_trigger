@@ -79,6 +79,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double GetRI(){return fRI;};
 
     void SetDetectorName(G4String);
+    void SetABSFile(G4String);
 
 
 
@@ -142,6 +143,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4int fDetectorType;
     G4String fDetectorName;
     G4String fVolName;
+    G4String fABSFile;
 
     DetectorMessenger* fDetectorMessenger;
 };
