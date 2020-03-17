@@ -75,7 +75,7 @@ DetectorConstruction::DetectorConstruction()
   fRES = 4.0;
   fLY = 10500./MeV;
   fDetectorName = "6pmt_coverage_pe";
-  fABSFile = "Exp4_long.csv";
+  fABSFile = "Exp4_long";
   fVolName = "World";
   fSigAlpha = 0.5;
   DefineMaterials();
@@ -260,7 +260,7 @@ void DetectorConstruction::DefineMaterials(){
   G4int absEntries = 0;
   ifstream ReadAbs;
 
-  G4String absFile = "../input_files/"+fABSFile;
+  G4String absFile = "../input_files/"+fABSFile+".csv";
   G4double emission_fibre[102]={0};
   ReadAbs.open(absFile);
   G4double var = GetABS();
